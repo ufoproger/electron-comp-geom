@@ -1,31 +1,42 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
 
-  <link rel="stylesheet" href="modules/photon/dist/css/photon.css">
+	<link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="src/style.css">
   </head>
   <body>
-    <div class="window">
-      <div class="window-content">
-        <div class="pane-group">
-          <div class="pane-sm sidebar">...</div>
-          <div class="pane">
-            <h1>Hello World!</h1>
-            <!-- All of the Node.js APIs are available in this renderer process. -->
-            We are using Node.js <script>document.write(process.versions.node)</script>,
-            Chromium <script>document.write(process.versions.chrome)</script>,
-            and Electron <script>document.write(process.versions.electron)</script>.
-          </div>
-        </div>
-      </div>
-    </div>
-    
+	  <div class="container-fluid">
+
+		<div class="jumbotron">
+		  <h1 class="display-3">Hello, world!</h1>
+		  <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+		  <hr class="my-4">
+		  <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+		  <p class="lead">
+		    <a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+		  </p>
+		</div>
+
+	    <h1>Hello, world!</h1>
+
+		We are using Node.js <script>document.write(process.versions.node)</script>,
+		Chromium <script>document.write(process.versions.chrome)</script>,
+		and Electron <script>document.write(process.versions.electron)</script>.
+	</div>
+
+	<script>
+		window.$ = window.jQuery = require('jquery');
+	</script>
+
+    <script src="node_modules/tether/dist/js/tether.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
   </body>
 
-  <script>
-    // You can also require other files to run in this process
-    require('./renderer.js')
-  </script>
+    <script>
+      require('./renderer.js')
+    </script>
 </html>
