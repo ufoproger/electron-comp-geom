@@ -1,27 +1,25 @@
 {
-  "name": "electron-quick-start",
+  "name": "electron-comp-geom",
   "version": "1.0.0",
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/ufoproger/electron-comp-geom",
   "keywords": [
     "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
   ],
-  "author": "GitHub",
+  "author": "ufoproger",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "~1.6.2"
   },
   "dependencies": {
-    "bootstrap": "^4.0.0-alpha.6",
     "jquery": "^3.2.1",
-    "tether": "^1.4.0"
+    "mustache": "^2.3.0",
+    "object-hash": "^1.1.8",
+    "plotly.js": "^1.27.1",
+    "semantic-ui-css": "^2.2.10"
   }
 }

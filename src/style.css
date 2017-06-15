@@ -1,3 +1,10 @@
 body {
-	padding-top: 1rem;
+	padding-top: 15px;
+}
+
+td.right-tools > .pull-right {
+  display: none;
+}
+td.right-tools:hover > .pull-right {
+  display: block;
 }
