@@ -1,5 +1,5 @@
 /* global $, Plotly */
-const Mustache = require('Mustache')
+const Mustache = require('mustache')
 const {Task, Point, Edge} = require('./classes.js')
 const ipc = require('electron').ipcRenderer
 
