@@ -20,6 +20,7 @@
     "mustache": "^2.3.0",
     "object-hash": "^1.1.8",
     "plotly.js": "^1.27.1",
-    "semantic-ui-css": "^2.2.10"
+    "semantic-ui-css": "^2.2.10",
+    "underscore": "^1.8.3"
   }
 }

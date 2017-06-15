@@ -1,7 +1,13 @@
 /* global $, Plotly */
 const Mustache = require('mustache')
-const {Task, Point, Edge} = require('./classes.js')
 const ipc = require('electron').ipcRenderer
+
+const fs = require('fs')
+const path = require('path')
+
+const Task = require('./src/task.js')
+const Edge = require('./src/edge.js')
+const Point = require('./src/point.js')
 
 const $edges = $('#edges')
 const $edgesCount = $('#edges-count')
@@ -10,7 +16,22 @@ let gd
 let task = new Task()
 
 $(document).ready(function () {
-  task.addEdge(new Edge(new Point(1, 0), new Point(2, 2)))
+  gd = Plotly.d3.select('#plot').node()
+
+  task.edgesArr = [
+    [-1, -2, 0, 0],
+    [0, 0, 1, -2],
+    [1, -2, 2, 1],
+    [2, 1, 3, 0],
+    [3, 0, 4, 1],
+    [4, 1, 5, -3],
+    [5, -3, 6, 2],
+    [6, 2, 0, 3],
+    [0, 3, -2, 0],
+    [0, 0, 2, 1],
+    [2, 1, 4, 1],
+    [4, 1, 6, 2]
+  ]
 
   $edges.on('click', 'a', function (e) {
     e.preventDefault()
@@ -24,32 +45,26 @@ $(document).ready(function () {
 
   syncEdgeChanges()
 
-  let trace1 = {
-    x: [1, 2, 3, 4],
-    y: [10, 15, 13, 17],
-    type: 'scatter'
-  }
+  $('#open-file').click(function (e) {
+    ipc.send('open-file-dialog')
+  })
 
-  let trace2 = {
-    x: [1, 2, 3, 4],
-    y: [16, 5, 11, 9],
-    type: 'scatter'
-  }
+  $('#save-file').click(function (e) {
+    ipc.send('save-file-dialog')
+  })
 
-  let data = [trace1, trace2]
-  let gd3 = Plotly.d3.select('#plot')
+  ipc.on('opened-file', (event, file) => {
+    fs.readFile(file, 'utf-8', function (err, data) {
+      let arr = JSON.parse(data)
 
-  gd = gd3.node()
+      task.edgesArr = arr
 
-  let layout = {
-    title: 'Планарный граф'
-  }
-
-  let options = {
-    staticPlot: true
-  }
-
-  Plotly.plot(gd, data, layout, options)
+      syncEdgeChanges()
+    })
+  })
+  ipc.on('saved-file', (event, file) => {
+    fs.writeFileSync(file, JSON.stringify(task.edgesArr))
+  })
 })
 
 window.onresize = function () {
@@ -57,10 +72,45 @@ window.onresize = function () {
 }
 
 function syncEdgeChanges () {
+  console.log('path length', task.connectedGraphPath.length)
   $edges.empty()
   $edgesCount.text(task.edges.length)
 
   for (let edge of task.edges) {
     $edges.append(Mustache.render($('#template-edge-label').html(), edge.objWithHash))
   }
+
+  Plotly.purge(gd)
+
+  let data = []
+
+  let graph = {
+    x: [],
+    y: [],
+    type: 'scatter'
+  }
+
+  for (let edge of task.connectedGraphPath) {
+    if (graph.x.length === 0) {
+      graph.x.push(edge.from.x)
+      graph.y.push(edge.from.y)
+    }
+
+    graph.x.push(edge.to.x)
+    graph.y.push(edge.to.y)
+  }
+
+  data.push(graph)
+
+  let d = new Date()
+
+  let layout = {
+    title: 'Планарный граф' + d.getTime()
+  }
+
+  let options = {
+    staticPlot: true
+  }
+
+  Plotly.plot(gd, data, layout, options)
 }
