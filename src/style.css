@@ -2,9 +2,19 @@ body {
 	padding-top: 15px;
 }
 
-td.right-tools > .pull-right {
-  display: none;
+#edges > a.label {
+  display: inline-block;
+  font-weight: normal;
 }
-td.right-tools:hover > .pull-right {
-  display: block;
+
+div[data-notify="container"] > span[data-notify="title"] {
+  font-weight: bold;
+}
+
+form#new-edge > .form-group:last-of-type {
+  margin-bottom: 0 !important;
+}
+
+.row > .well {
+  /*margin: 10px*/
 }

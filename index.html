@@ -4,43 +4,138 @@
   <head>
     <!-- Standard Meta -->
     <meta charset="utf-8" />
-
     <title>Responsive Elements - Semantic</title>
-    <link rel="stylesheet" type="text/css" href="node_modules/semantic-ui-css/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="src/style.css">
     <script>
       window.$ = window.jQuery = require('jquery');
     </script>
-    <!-- <script src="node_modules/semantic-ui-css/semantic.min.js"></script> -->
-
   </head>
   <body>
-    <div class="ui container">
+    <div class="container-fluid">
+
       <div id="plot"></div>
 
-	  <div>
-		  <button id="open-file" class="ui button">Загрузить из файла</button>
-  		  <button id="save-file" class="ui button">Сохранить</button>
-	  </div>
+      <div class="row">
 
-      <h2 class="ui header">
-        <div class="content">
-          Список рёбер графа (<span id="edges-count">0</span> шт.)
-          <div class="sub header">Для удаления ребра кликните по нему в списке ниже</div>
+        <!-- Левая панель -->
+        <div class="col-sm-4 col-md-3 col-lg-2">
+
+          <button id="open-file"class="btn btn-default btn-block">Загрузить из файла</button>
+          <button id="save-file"class="btn btn-default btn-block">Сохранить в файл</button>
+
+          <br/>
+
+          <!-- Добавление ребра -->
+          <form id="new-edge">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Добавление ребра</h3>
+              </div>
+
+              <div class="panel-body">
+                <label>Начало ребра</label>
+
+                <div class="input-group input-group-sm">
+                  <span class="input-group-addon">
+                    <var>x</var>
+                  </span>
+                  <input type="number" class="form-control" id="new-edge-from-x" required>
+                </div>
+
+                <br/>
+
+                <div class="input-group input-group-sm">
+                  <span class="input-group-addon">
+                    <var>y</var>
+                  </span>
+                  <input type="number" class="form-control" id="new-edge-from-y" required>
+                </div>
+
+                <br/>
+                <label>Конец ребра</label>
+
+                <div class="input-group input-group-sm">
+                  <span class="input-group-addon">
+                    <var>x</var>
+                  </span>
+                  <input type="number" class="form-control" id="new-edge-to-x" required>
+                </div>
+
+                <br/>
+
+                <div class="input-group input-group-sm">
+                  <span class="input-group-addon">
+                    <var>y</var>
+                  </span>
+                  <input type="number" class="form-control" id="new-edge-to-y" required>
+                </div>
+
+              </div>
+
+              <div class="panel-footer">
+                <button class="btn btn-primary"type="submit" >Добавить</button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Поиск грани для точки -->
+          <form id="point">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Локализация точки</h3>
+              </div>
+
+              <div class="panel-body">
+                <label>Координаты точки</label>
+
+                <div class="input-group input-group-sm">
+                  <span class="input-group-addon">
+                    <var>x</var>
+                  </span>
+                  <input type="number" class="form-control" id="point-x" required>
+                </div>
+
+                <br/>
+
+                <div class="input-group input-group-sm">
+                  <span class="input-group-addon">
+                    <var>y</var>
+                  </span>
+                  <input type="number" class="form-control" id="point-y" required>
+                </div>
+              </div>
+
+              <div class="panel-footer">
+                <button class="btn btn-primary"type="submit" >Локализовать</button>
+              </div>
+            </div>
+          </form>
+
         </div>
-      </h2>
 
-      <div id="edges" class="ui large blue labels"></div>
+        <!-- Список рёбер графа-->
+        <div class="col-sm-8 col-md-8 col-lg-10">
+          <h2>
+            Список рёбер графа (<span id="edges-count">0</span> шт)
+          </h2>
+
+          <p>Для удаления ребра кликните по нему в списке ниже</p>
+
+          <h3 id="edges" class=""></h3>
+        </div>
+      </div>
+
     </div>
 
-    <script src="node_modules/plotly.js/dist/plotly.min.js"></script>
-
+    <script src="node_modules/plotly.js/dist/plotly-basic.min.js"></script>
     <script>
       require('./renderer.js')
     </script>
-
+    
     <script id="template-edge-label" type="x-tmpl-mustache">
-      <a class="ui label" href="#" data-hash="{{ hash }}">
-        <span>[({{ x_from }}, {{ y_from }}), ({{ x_to }}, {{ y_to }})]</span> <i class="delete icon"></i>
+      <a class="label label-default" href="#" data-hash="{{ hash }}">
+        [({{ x_from }}, {{ y_from }}), ({{ x_to }}, {{ y_to }})]</span>
       </a>
     </script>
   </body>

@@ -1,11 +1,14 @@
 const Edge = require('./edge.js')
 const Point = require('./point.js')
 
+const lineIntersect = require('line-intersect')
+
 const _ = require('underscore')
 
 class Task {
   constructor () {
     this._edges = []
+    this.syncCallback = () => { console.log('unimplemented sync callback') }
   }
 
   get edges () {
@@ -40,18 +43,39 @@ class Task {
     this._edges = []
 
     for (let item of arr) {
-      this.addEdge(Edge.createFromArr(item))
+      this.addEdge(Edge.createFromArr(item), false)
     }
+
+    this.syncCallback()
   }
 
-  addEdge (edge) {
+  addEdge (edge, sync = true) {
+    if (edge.length === 0) {
+      throw new TypeError('Ребро нулевой длины')
+    }
+
+    for (let e of this.edges) {
+      if (e.isEqual(edge)) {
+        throw new TypeError('Такое ребро уже имеется')
+      }
+    }
+
+    if (!this.testPlanarWithEdge(edge)) {
+      throw new TypeError('Нарушение планарности графа')
+    }
+
     this._edges.push(edge)
+
+    if (sync) {
+      this.syncCallback()
+    }
 
     return true
   }
 
   removeByHash (h) {
     this._edges = this._edges.filter(edge => edge.hash !== h)
+    this.syncCallback()
   }
 
   get connectedGraphPath () {
@@ -86,7 +110,7 @@ class Task {
         }
 
       // Нашли подходящее ребро, которое включаем в маршрут
-        visited[edge.hash] = edge
+        visited[edge.hash] = edge.clone
         path.push(new Edge(point, asidePoint))
         isOk = true
         break
@@ -129,6 +153,72 @@ class Task {
 
   get isConnectedGraph () {
     return this.connectedGraphPath.length !== 0
+  }
+
+  testPlanarWithEdge (edge) {
+    for (let e of this.edges) {
+      var result = lineIntersect.checkIntersection(
+        e.from.x, e.from.y, e.to.x, e.to.y,
+        edge.from.x, edge.from.y, edge.to.x, edge.to.y
+      )
+
+      if (result.type !== 'intersecting') {
+        continue
+      }
+
+      let point = new Point(result.point.x, result.point.y)
+
+      if (e.hasPoint(point) && edge.hasPoint(point)) {
+        continue
+      }
+
+      return false
+    }
+
+    return true
+  }
+
+  get isPlanarGraph () {
+    for (let edge of this.edges) {
+      if (!this.testPlanarWithEdge(edge)) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  axeValues (name) {
+    let axe = ''
+
+    switch (name) {
+      case 'x':
+      case 'X':
+        axe = 'x'
+        break
+
+      case 'y':
+      case 'Y':
+        axe = 'y'
+        break
+
+      default:
+        throw new RangeError('Неверное название оси координат')
+    }
+
+    let values = _.pluck(this.points, axe)
+
+    values.sort((a, b) => a - b)
+
+    return _.uniq(values, true)
+  }
+
+  get xValues () {
+    return this.axeValues('x')
+  }
+
+  get yValues () {
+    return this.axeValues('y')
   }
 }
 

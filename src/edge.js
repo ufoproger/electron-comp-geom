@@ -64,6 +64,10 @@ class Edge {
     return new Edge(this.to.clone, this.from.clone)
   }
 
+  get length () {
+    return Math.sqrt(Math.pow(this.to.x - this.from.x, 2) + Math.pow(this.to.y - this.from.y, 2), 2)
+  }
+
   isEqual (edge) {
     return (this.hasPoint(edge.from) && this.hasPoint(edge.to))
   }
