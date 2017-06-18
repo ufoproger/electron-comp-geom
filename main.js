@@ -1,10 +1,10 @@
 const electron = require('electron')
-// Module to control application life.
+
 const app = electron.app
-// Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
 const ipc = electron.ipcMain
 const dialog = electron.dialog
+
 const _ = require('underscore')
 
 const path = require('path')
@@ -14,6 +14,7 @@ let mainWindow
 
 function createWindow () {
   mainWindow = new BrowserWindow()
+  mainWindow.setMenu(null)
 
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'index.html'),

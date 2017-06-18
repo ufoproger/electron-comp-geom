@@ -6,6 +6,10 @@ class Point {
     this._y = y
   }
 
+  static comparator (a, b) {
+    return (a.x === b.x) ? (a.y < b.y) : (a.x < b.x)
+  }
+
   get x () {
     return this._x
   }

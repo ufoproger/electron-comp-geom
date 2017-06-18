@@ -1,6 +1,7 @@
 const hash = require('object-hash')
 const _ = require('underscore')
 const Point = require('./point.js')
+const lineIntersect = require('line-intersect')
 
 class Edge {
   constructor (from, to) {
@@ -53,7 +54,8 @@ class Edge {
   }
 
   get hash () {
-    return hash(this.obj)
+    return `${this.from.x},${this.from.y}:${this.to.x},${this.to.y}`
+    // return hash(this.obj)
   }
 
   get clone () {
@@ -72,8 +74,26 @@ class Edge {
     return (this.hasPoint(edge.from) && this.hasPoint(edge.to))
   }
 
+  // Точка является одной из вершин этого ребра
   hasPoint (point) {
     return (this.from.isEqual(point) || this.to.isEqual(point))
+  }
+
+  // Точка либо является вершиной, либо лежит на ребре
+  containsPoint (point) {
+    let p = {}
+
+    for (let key of ['x', 'y']) {
+      p[key] = (point[key] - this.to[key]) / (this.from[key] - this.to[key])
+    }
+
+    let len = Math.abs(p.x - p.y)
+
+    if (len > 1e-3 || p.x < 0 || p.x > 1) {
+      return false
+    }
+
+    return true
   }
 
   asidePoint (point) {
@@ -86,6 +106,10 @@ class Edge {
     }
 
     return null
+  }
+
+  get sort () {
+    return Point.comparator(this.from, this.to) ? this.clone : this.reverse
   }
 }
 

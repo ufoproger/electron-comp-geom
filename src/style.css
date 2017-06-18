@@ -15,6 +15,6 @@ form#new-edge > .form-group:last-of-type {
   margin-bottom: 0 !important;
 }
 
-.row > .well {
-  /*margin: 10px*/
+.panel-body > dl {
+  margin-bottom: 0 !important;
 }

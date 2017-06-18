@@ -1,10 +1,8 @@
-
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- Standard Meta -->
     <meta charset="utf-8" />
-    <title>Responsive Elements - Semantic</title>
+    <title>Локализация в ППЛГ методом полос</title>
     <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="src/style.css">
     <script>
@@ -19,12 +17,45 @@
       <div class="row">
 
         <!-- Левая панель -->
-        <div class="col-sm-4 col-md-3 col-lg-2">
+        <div class="col-sm-4 col-md-4 col-lg-3">
 
           <button id="open-file"class="btn btn-default btn-block">Загрузить из файла</button>
           <button id="save-file"class="btn btn-default btn-block">Сохранить в файл</button>
 
           <br/>
+
+          <!-- Информация о графе -->
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Информация о графе</h3>
+            </div>
+
+            <div class="panel-body">
+              <dl class="dl-horizontal">
+                <dt>Количество вершин</dt>
+                <dd id="graph-vertexes-count">...</dd>
+                <dt>Количество рёбер</dt>
+                <dd id="graph-edges-count">...</dd>
+                <dt>Количество граней</dt>
+                <dd id="graph-facets-count">...</dd>
+              </dl>
+
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" id="show-slabs" checked>
+                  Пока&shy;зы&shy;вать гори&shy;зон&shy;тальные линии метода полос
+                </label>
+              </div>
+
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" id="show-facets" checked>
+                  Пока&shy;зы&shy;вать примерное положение граней
+                </label>
+              </div>
+
+            </div>
+          </div>
 
           <!-- Добавление ребра -->
           <form id="new-edge">
@@ -40,7 +71,7 @@
                   <span class="input-group-addon">
                     <var>x</var>
                   </span>
-                  <input type="number" class="form-control" id="new-edge-from-x" required>
+                  <input type="number" class="form-control" min="-100" max="100" step="0.1" id="new-edge-from-x" required>
                 </div>
 
                 <br/>
@@ -49,7 +80,7 @@
                   <span class="input-group-addon">
                     <var>y</var>
                   </span>
-                  <input type="number" class="form-control" id="new-edge-from-y" required>
+                  <input type="number" class="form-control" min="-100" max="100" step="0.1" id="new-edge-from-y" required>
                 </div>
 
                 <br/>
@@ -59,7 +90,7 @@
                   <span class="input-group-addon">
                     <var>x</var>
                   </span>
-                  <input type="number" class="form-control" id="new-edge-to-x" required>
+                  <input type="number" class="form-control" min="-100" max="100" step="0.1" id="new-edge-to-x" required>
                 </div>
 
                 <br/>
@@ -68,7 +99,7 @@
                   <span class="input-group-addon">
                     <var>y</var>
                   </span>
-                  <input type="number" class="form-control" id="new-edge-to-y" required>
+                  <input type="number" class="form-control" min="-100" max="100" step="0.1" id="new-edge-to-y" required>
                 </div>
 
               </div>
@@ -93,7 +124,7 @@
                   <span class="input-group-addon">
                     <var>x</var>
                   </span>
-                  <input type="number" class="form-control" id="point-x" required>
+                  <input type="number" class="form-control" min="-100" max="100" step="0.1" id="point-x" required>
                 </div>
 
                 <br/>
@@ -102,12 +133,13 @@
                   <span class="input-group-addon">
                     <var>y</var>
                   </span>
-                  <input type="number" class="form-control" id="point-y" required>
+                  <input type="number" class="form-control" min="-100" max="100" step="0.1" id="point-y" required>
                 </div>
               </div>
 
               <div class="panel-footer">
                 <button class="btn btn-primary"type="submit" >Локализовать</button>
+                <a href="#" id="point-delete" class="btn btn-warning"><span class="glyphicon glyphicon-trash"></span></a>
               </div>
             </div>
           </form>
@@ -115,14 +147,16 @@
         </div>
 
         <!-- Список рёбер графа-->
-        <div class="col-sm-8 col-md-8 col-lg-10">
+        <div class="col-sm-8 col-md-8 col-lg-9">
+          <div id="answer"></div>
+
           <h2>
             Список рёбер графа (<span id="edges-count">0</span> шт)
           </h2>
 
           <p>Для удаления ребра кликните по нему в списке ниже</p>
 
-          <h3 id="edges" class=""></h3>
+          <h3 id="edges"></h3>
         </div>
       </div>
 
@@ -132,11 +166,22 @@
     <script>
       require('./renderer.js')
     </script>
-    
+
     <script id="template-edge-label" type="x-tmpl-mustache">
       <a class="label label-default" href="#" data-hash="{{ hash }}">
-        [({{ x_from }}, {{ y_from }}), ({{ x_to }}, {{ y_to }})]</span>
+        [({{ x_from }}, {{ y_from }}), ({{ x_to }}, {{ y_to }})]
       </a>
+    </script>
+
+    <script id="template-point-answer" type="x-tmpl-mustache">
+      <div class="alert alert-success" role="alert">
+        <strong>Локализация точки: </strong>{{{message}}}</div>
+    </script>
+
+    <script id="template-edge" type="x-tmpl-mustache">
+      <span class="label label-default">
+        [({{ from.x }}, {{ from.y }}), ({{ to.x }}, {{ to.y }})]
+      </span>
     </script>
   </body>
 </html>

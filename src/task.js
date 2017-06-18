@@ -1,6 +1,5 @@
 const Edge = require('./edge.js')
 const Point = require('./point.js')
-
 const lineIntersect = require('line-intersect')
 
 const _ = require('underscore')
@@ -8,11 +7,24 @@ const _ = require('underscore')
 class Task {
   constructor () {
     this._edges = []
-    this.syncCallback = () => { console.log('unimplemented sync callback') }
+    this._slabs = []
+    this.syncCallback = () => { console.log('Unimplemented sync callback') }
   }
 
   get edges () {
     return this._edges
+  }
+
+  edgesContainsY (y) {
+    let edges = []
+
+    for (let edge of this._edges) {
+      if ((edge.from.y >= y && edge.to.y <= y) || (edge.to.y >= y && edge.from.y <= y)) {
+        edges.push(edge.clone)
+      }
+    }
+
+    return edges
   }
 
   get points () {
@@ -27,6 +39,10 @@ class Task {
     }
 
     return _.values(points)
+  }
+
+  get facets () {
+    return (2 - this.points.length + this.edges.length)
   }
 
   get edgesArr () {
@@ -188,25 +204,56 @@ class Task {
     return true
   }
 
-  axeValues (name) {
-    let axe = ''
+  // Проверка графа на цикличность
+  get isCiclicGraph () {
+    // Запомним сколько раз каждая вершина встречается в графе
+    let points = {}
 
+    // Пробежим по всем рёбрам
+    for (let edge of this.edges) {
+      // Обработаем начало и конец ребра
+      for (let key of ['from', 'to']) {
+        let h = edge[key].hash
+
+        // Если эту вершину уже находили, то увеличиваем количество
+        if (_.has(points, h)) {
+          points[h]++
+        // Иначе помечаем, что встретили впервые
+        } else {
+          points[h] = 1
+        }
+      }
+    }
+
+    // Пробежим по массиву найденных вершин
+    for (let key in points) {
+      // Если есть вершина, из которой вышло только 1 ребро, то граф ациклический
+      if (points[key] < 2) {
+        return false
+      }
+    }
+
+    // Иначе граф циклический
+    return true
+  }
+
+  axeName (name) {
     switch (name) {
       case 'x':
       case 'X':
-        axe = 'x'
-        break
+        return 'x'
 
       case 'y':
       case 'Y':
-        axe = 'y'
-        break
+        return 'y'
 
       default:
         throw new RangeError('Неверное название оси координат')
     }
+  }
 
-    let values = _.pluck(this.points, axe)
+  axeValues (name) {
+    let values = _.pluck(this.points, this.axeName(name))
 
     values.sort((a, b) => a - b)
 
@@ -220,6 +267,26 @@ class Task {
   get yValues () {
     return this.axeValues('y')
   }
-}
 
+  axeRange (name) {
+    let values = this.axeValues(name)
+
+    if (!values.length) {
+      values = [0]
+    }
+
+    return {
+      min: values[0],
+      max: _.last(values)
+    }
+  }
+
+  get xRange () {
+    return this.axeRange('x')
+  }
+
+  get yRange () {
+    return this.axeRange('y')
+  }
+}
 module.exports = Task
