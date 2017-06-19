@@ -1,12 +1,9 @@
+/* Отступ страницы */
 body {
 	padding-top: 15px;
 }
 
-#edges > a.label {
-  display: inline-block;
-  font-weight: normal;
-}
-
+/* Жирные заголовок для уведомлений */
 div[data-notify="container"] > span[data-notify="title"] {
   font-weight: bold;
 }

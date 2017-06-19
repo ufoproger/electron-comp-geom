@@ -1,14 +1,16 @@
 const hash = require('object-hash')
 const _ = require('underscore')
 const Point = require('./point.js')
-const lineIntersect = require('line-intersect')
 
+// Класс, реализующий отрезок на плоскости (с обобщением на ребро графа)
 class Edge {
+  // Исходные координаты отрезка
   constructor (from, to) {
     this._from = from
     this._to = to
   }
 
+  // Создание экземпляра отрезка из одномерного массива с 4 числами
   static createFromArr (arr) {
     if (!_.isArray(arr) || arr.length !== 4) {
       return false
@@ -45,6 +47,7 @@ class Edge {
     }
   }
 
+  // Одномерный массив с координатами
   get arr () {
     return _.values(this.obj)
   }
@@ -54,22 +57,25 @@ class Edge {
   }
 
   get hash () {
-    return `${this.from.x},${this.from.y}:${this.to.x},${this.to.y}`
-    // return hash(this.obj)
+    // return `${this.from.x},${this.from.y}:${this.to.x},${this.to.y}`
+    return hash(this.obj)
   }
 
   get clone () {
     return new Edge(this.from.clone, this.to.clone)
   }
 
+  // Переворачиваем отрезок задом наперед
   get reverse () {
     return new Edge(this.to.clone, this.from.clone)
   }
 
+  // Евклидова длина
   get length () {
     return Math.sqrt(Math.pow(this.to.x - this.from.x, 2) + Math.pow(this.to.y - this.from.y, 2), 2)
   }
 
+  // Проверка эквивалентности
   isEqual (edge) {
     return (this.hasPoint(edge.from) && this.hasPoint(edge.to))
   }
@@ -96,18 +102,23 @@ class Edge {
     return true
   }
 
+  // Противоположный конец отрезка заданного конца
   asidePoint (point) {
+    // Если задано начало отрезка, то возвращаем конец
     if (this.from.isEqual(point)) {
       return this.to.clone
     }
 
+    // Если задан конец отрезка, то возвращаем начало
     if (this.to.isEqual(point)) {
       return this.from.clone
     }
 
+    // Иначе это какое-то недоразумение
     return null
   }
 
+  // Упорядочиваем отрезок так, чтобы начало было снизу
   get sort () {
     return Point.comparator(this.from, this.to) ? this.clone : this.reverse
   }

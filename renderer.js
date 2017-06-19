@@ -14,7 +14,8 @@ const Edge = require('./src/edge.js')
 const Point = require('./src/point.js')
 const Slabs = require('./src/slabs.js')
 
-const $edges = $('#edges')
+// Элементы страницы
+const $edges = $('#edges > tbody')
 const $edgesCount = $('#edges-count, #graph-edges-count')
 const $vertexesCount = $('#graph-vertexes-count')
 const $facetsCount = $('#graph-facets-count')
@@ -25,26 +26,34 @@ const $checkboxSlabs = $('#show-slabs')
 const $checkboxFacets = $('#show-facets')
 const $answer = $('#answer')
 
+// Шаблоны
 let template = {}
 
+// Область графика
 let gd
+// Логика работы с графом
 let task = new Task()
+// Метод полос
 let slabs = null
+// Точка, которую необходимо локализовать
 let localizePoint = null
-
 // Граф, с которым можно работать
 let isWorkableGraph = false
 
+// Когда страница готова
 $(document).ready(function () {
+  // Инициализируем шаблоны
   template = {
     edgeLabel: $('#template-edge-label').html(),
+    edgeRow: $('#template-edge-row').html(),
     edge: $('#template-edge').html(),
     answer: $('#template-point-answer').html()
   }
 
+  // Выделяем под график место
   gd = Plotly.d3.select('#plot').node()
-
-  /* task.edgesArr = [
+  /*
+  task.edgesArr = [
     [-1, -2, 0, 0],
     [0, 0, 1, -2],
     [1, -2, 2, 1],
@@ -58,22 +67,31 @@ $(document).ready(function () {
     [0, 0, 2, 1],
     [2, 1, 4, 1],
     [4, 1, 6, 2]
-  ] */
-
+  ]
+  */
+  // Удаление рёбер в таблице
   $edges.on('click', 'a', function (e) {
+    // Прерываем цепочку вызовов
     e.preventDefault()
 
-    let $el = $(this)
+    // Уходим в строку таблицы
+    let $el = $(this).closest('tr')
 
+    // Удаляем ребро
     task.removeByHash($el.data('hash'))
+    // И строку
     $el.remove()
   })
 
+  // Чекбоксы внешнего вида графика
   $checkboxSlabs.on('change', task.syncCallback)
   $checkboxFacets.on('change', task.syncCallback)
 
+  // Валидация формы локализации точки
   $point.validator().on('submit', (e) => {
+    // Если была ошибка валидации
     if (e.isDefaultPrevented()) {
+      // Сообщаем
       $.notify({
         title: 'Некорректные данные',
         message: 'Не все поля заполнены должным образом'
@@ -81,12 +99,14 @@ $(document).ready(function () {
         type: 'danger'
       })
 
+      // Нечего локализовать
       localizePoint = null
       return
     }
 
     e.preventDefault()
 
+    // Если метод полос не применим
     if (_.isNull(slabs)) {
       $.notify({
         title: 'Некорректный граф',
@@ -99,14 +119,18 @@ $(document).ready(function () {
       return
     }
 
+    // Получаем координаты точки
     let x = parseFloat($point.find('#point-x').val())
     let y = parseFloat($point.find('#point-y').val())
 
+    // Задаем новую точку для локализации
     localizePoint = new Point(x, y)
 
+    // Пока обновить график
     task.syncCallback()
   })
 
+  // Удаление точки, которую необходимо локализовать
   $pointDelete.click(function (e) {
     e.preventDefault()
 
@@ -118,7 +142,9 @@ $(document).ready(function () {
     task.syncCallback()
   })
 
+  // Добавление ребра в граф
   $newEdge.validator().on('submit', (e) => {
+    // Если ошибка валидации, то сообщаем об этом
     if (e.isDefaultPrevented()) {
       $.notify({
         title: 'Некорректные данные',
@@ -131,12 +157,13 @@ $(document).ready(function () {
     }
 
     e.preventDefault()
-
+    // Иначе получаем координаты ребра
     let xFrom = parseFloat($newEdge.find('#new-edge-from-x').val())
     let yFrom = parseFloat($newEdge.find('#new-edge-from-y').val())
     let xTo = parseFloat($newEdge.find('#new-edge-to-x').val())
     let yTo = parseFloat($newEdge.find('#new-edge-to-y').val())
 
+    // Пытаем добавить
     try {
       task.addEdge(new Edge(new Point(xFrom, yFrom), new Point(xTo, yTo)))
 
@@ -144,6 +171,7 @@ $(document).ready(function () {
         message: 'Ребро успешно добавлено.'
       })
     } catch (e) {
+      // Добавить не получилось
       $.notify({
         title: 'Ошибка добавления ребра!',
         message: e.message
@@ -153,16 +181,21 @@ $(document).ready(function () {
     }
   })
 
+  // Пользователь хочет открыть файл с графом
   $('#open-file').click(function (e) {
     ipc.send('open-file-dialog')
   })
 
+  // Пользователь хочет сохранить граф
   $('#save-file').click(function (e) {
     ipc.send('save-file-dialog')
   })
 
+  // Пользователь выбрал файл с графом
   ipc.on('opened-file', (event, file) => {
+    // Читаем файл
     fs.readFile(file, 'utf-8', function (err, data) {
+      // Пытаемся его загрузить
       try {
         task.edgesArr = JSON.parse(data)
       } catch (e) {
@@ -176,26 +209,32 @@ $(document).ready(function () {
     })
   })
 
+  // Пользователь выбрал файл для сохранения
   ipc.on('saved-file', (event, file) => {
     fs.writeFileSync(file, JSON.stringify(task.edgesArr))
   })
 })
 
+// При изменение размера окна изменяем размер графика
 window.onresize = function () {
   Plotly.Plots.resize(gd)
 }
 
+// Обновляем график при обновлении состава графа
 task.syncCallback = () => {
+  // Обволяем контент с информацией о графике
   $edges.empty()
   $edgesCount.text(task.edges.length)
   $vertexesCount.text(task.points.length)
 
   for (let edge of task.edges) {
-    $edges.append(Mustache.render(template.edgeLabel, edge.objWithHash))
+    $edges.append(Mustache.render(template.edgeRow, edge.objWithHash))
   }
 
+  // Предполагаем, что граф корректный
   isWorkableGraph = true
 
+  // Если граф не цикличный
   if (!task.isCiclicGraph) {
     isWorkableGraph = false
 
@@ -207,11 +246,13 @@ task.syncCallback = () => {
     })
   }
 
+  // Строим график графа
   console.time('connected graph path')
   let pathEdges = task.connectedGraphPath
   console.timeEnd('connected graph path')
   let data = []
 
+  // Если не удалось построить, то граф нам не подходит
   if (!pathEdges.length) {
     isWorkableGraph = false
 
@@ -223,6 +264,7 @@ task.syncCallback = () => {
     })
   }
 
+  // Если всё ок, выводим граф
   if (pathEdges.length && isWorkableGraph) {
     let graph = {
       x: [],
@@ -231,11 +273,11 @@ task.syncCallback = () => {
       name: 'Граф',
       marker: {
         size: 8,
-        color: '#3333FF'
+        color: '#00ccff'
       },
       line: {
-        width: 2,
-        color: '#3333FF'
+        width: 3,
+        color: '#00ccff'
       }
     }
 
@@ -249,6 +291,7 @@ task.syncCallback = () => {
       graph.y.push(edge.to.y)
     }
 
+    // Если надо вывести границы полос, то выводим
     if ($checkboxSlabs.prop('checked')) {
       let xRange = {
         from: task.xValues[0],
@@ -263,8 +306,8 @@ task.syncCallback = () => {
           mode: 'lines',
           name: `y = ${value}`,
           line: {
-            width: 1,
-            color: '#33CC99'
+            width: 2,
+            color: '#194d00'
           }
         })
       }
@@ -272,23 +315,29 @@ task.syncCallback = () => {
 
     data.push(graph)
   } else {
+    // Иначе выводим рёбра графа для наглядности того, почему он нам не подходит
     for (let edge of task.edges) {
       data.push({
         x: [edge.from.x, edge.to.x],
         y: [edge.from.y, edge.to.y],
-        type: 'scatter'
+        type: 'scatter',
+        name: 'Ребро'
       })
     }
   }
 
+  // Если граф корректный
   if (isWorkableGraph) {
+    // Вычисляем кол-во граней
     $facetsCount.text(task.facets)
 
+    // Предобработка метода полос
     console.time('slabs precalc')
     slabs = null
     slabs = new Slabs(task.edges)
     console.timeEnd('slabs precalc')
 
+    // Визуально обозначаем на графе где какая грань
     let facets = {
       x: [],
       y: [],
@@ -309,10 +358,12 @@ task.syncCallback = () => {
       facets.text.push(`Грань № ${i + 1}`)
     }
 
+    // Если надо вывести на график грани - выводим
     if ($checkboxFacets.prop('checked')) {
       data.push(facets)
     }
 
+    // Если есть точка, которую надо локализовать
     if (!_.isNull(localizePoint)) {
       let point = {
         x: [localizePoint.x],
@@ -322,17 +373,19 @@ task.syncCallback = () => {
         name: 'Исследуемая точка',
         marker: {
           size: 10,
-          color: 'red'
+          color: '#bf00ff'
         }
       }
 
       data.push(point)
 
+      // Локализуем
       let result = slabs.localizePoint(localizePoint)
       let o = {
         message: ''
       }
 
+      // Выводим ответ
       switch (result.type) {
         case 'on vertex':
           o.message = 'точка расположена в вершине графа.'
@@ -384,5 +437,9 @@ task.syncCallback = () => {
   }
 
   Plotly.purge(gd)
-  Plotly.plot(gd, data, layout, options)
+
+  // Если граф есть, то выводим его
+  if (task.edges.length) {
+    Plotly.plot(gd, data, layout, options)
+  }
 }

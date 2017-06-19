@@ -4,10 +4,12 @@ const lineIntersect = require('line-intersect')
 
 const _ = require('underscore')
 
+// Класс, реализующий обработку графа, его наполнение и контроль корректности
 class Task {
   constructor () {
+    // Список рёбер
     this._edges = []
-    this._slabs = []
+    // При изменении списка рёбер (состава графа) вызывается коллбек
     this.syncCallback = () => { console.log('Unimplemented sync callback') }
   }
 
@@ -15,36 +17,31 @@ class Task {
     return this._edges
   }
 
-  edgesContainsY (y) {
-    let edges = []
-
-    for (let edge of this._edges) {
-      if ((edge.from.y >= y && edge.to.y <= y) || (edge.to.y >= y && edge.from.y <= y)) {
-        edges.push(edge.clone)
-      }
-    }
-
-    return edges
-  }
-
+  // Список вершин графа (без дублирования)
   get points () {
     let points = {}
 
+    // Пробегаем по всех рёбрам
     for (let edge of this.edges) {
+      // Просматриваем концы ребра
       for (let key of ['from', 'to']) {
+        // Если этого конца ещё нет в списке, то добавляем
         if (!_.has(points, edge[key].hash)) {
           points[edge[key].hash] = edge[key].clone
         }
       }
     }
 
+    // Возвращаем массив с вершинами графа
     return _.values(points)
   }
 
+  // Предполагая, что граф == ППЛГ, вычисляем количество граней по формуле Евклида
   get facets () {
     return (2 - this.points.length + this.edges.length)
   }
 
+  // Экспорт списка рёбер в 2-мерный массив N x 4
   get edgesArr () {
     let arr = []
 
@@ -55,6 +52,7 @@ class Task {
     return arr
   }
 
+  // Импорт списка рёбер из 2-мерного массива N x 4
   set edgesArr (arr) {
     this._edges = []
 
@@ -65,23 +63,29 @@ class Task {
     this.syncCallback()
   }
 
+  // Добавление ребра в граф
   addEdge (edge, sync = true) {
+    // Если ребро вырождается в точку, то отсекаем
     if (edge.length === 0) {
       throw new TypeError('Ребро нулевой длины')
     }
 
+    // Если такое ребро уже добавлено, то отсекаем
     for (let e of this.edges) {
       if (e.isEqual(edge)) {
         throw new TypeError('Такое ребро уже имеется')
       }
     }
 
+    // Если ребро пересекается с каким-нибудь из рёбер графа (нарушает планарность), то отсекаем
     if (!this.testPlanarWithEdge(edge)) {
       throw new TypeError('Нарушение планарности графа')
     }
 
+    // Добавляем ребро
     this._edges.push(edge)
 
+    // Если все рёбра добавлены, то сообщаем о изменении состава графа
     if (sync) {
       this.syncCallback()
     }
@@ -89,12 +93,17 @@ class Task {
     return true
   }
 
+  // Удаление ребра по его хешу
   removeByHash (h) {
+    // Удаляем ребро по хешу
     this._edges = this._edges.filter(edge => edge.hash !== h)
+    // Сообщаем об изменении состава графа
     this.syncCallback()
   }
 
+  // Проверка графа на связность. Возвращается массив с обходом графа через все вершины одним маршрутов (с повторениями рёбер)
   get connectedGraphPath () {
+    // Если графа нет, то и маршрута нет
     if (this.edges.length === 0) {
       return []
     }
@@ -167,10 +176,12 @@ class Task {
     return path
   }
 
+  // Проверка графа на связность
   get isConnectedGraph () {
     return this.connectedGraphPath.length !== 0
   }
 
+  // Проверка графа на пересечение с указанным ребром (нарушение планарности)
   testPlanarWithEdge (edge) {
     for (let e of this.edges) {
       var result = lineIntersect.checkIntersection(
@@ -194,6 +205,7 @@ class Task {
     return true
   }
 
+  // Проверка графа на планарность
   get isPlanarGraph () {
     for (let edge of this.edges) {
       if (!this.testPlanarWithEdge(edge)) {
@@ -268,6 +280,7 @@ class Task {
     return this.axeValues('y')
   }
 
+  // Минимакс графа по заданной оси
   axeRange (name) {
     let values = this.axeValues(name)
 

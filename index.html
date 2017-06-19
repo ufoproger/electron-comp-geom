@@ -57,6 +57,26 @@
             </div>
           </div>
 
+        </div>
+
+        <!-- Список рёбер графа-->
+        <div class="col-sm-4 col-md-4 col-lg-6">
+          <div id="answer"></div>
+
+          <h3>
+            Список рёбер графа (<span id="edges-count">0</span> шт)
+          </h3>
+
+          <!-- <h3 id="edges"></h3> -->
+          <table id="edges" class="table table-condensed table-striped">
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Правая панель -->
+        <div class="col-sm-4 col-md-4 col-lg-3">
+
           <!-- Добавление ребра -->
           <form id="new-edge">
             <div class="panel panel-default">
@@ -146,26 +166,21 @@
 
         </div>
 
-        <!-- Список рёбер графа-->
-        <div class="col-sm-8 col-md-8 col-lg-9">
-          <div id="answer"></div>
-
-          <h2>
-            Список рёбер графа (<span id="edges-count">0</span> шт)
-          </h2>
-
-          <p>Для удаления ребра кликните по нему в списке ниже</p>
-
-          <h3 id="edges"></h3>
-        </div>
       </div>
-
     </div>
 
     <script src="node_modules/plotly.js/dist/plotly-basic.min.js"></script>
     <script>
       require('./renderer.js')
     </script>
+
+      <script id="template-edge-row" type="x-tmpl-mustache">
+        <tr data-hash="{{ hash }}">
+          <td>({{ x_from }}, {{ y_from }})</td>
+          <td>({{ x_to }}, {{ y_to }})</td>
+          <td><a href="#">удалить</a></td>
+        </tr>
+      </script>
 
     <script id="template-edge-label" type="x-tmpl-mustache">
       <a class="label label-default" href="#" data-hash="{{ hash }}">
