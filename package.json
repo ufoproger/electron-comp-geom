@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron .",
     "pack": "build --dir",
-    "dist": "build --win --x64 --ia32"
+    "dist": "build"
   },
   "repository": "https://github.com/ufoproger/electron-comp-geom",
   "keywords": [
